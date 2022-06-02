@@ -5,7 +5,7 @@ import time
 
 # Establishing connection
 HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
-PORT = 12000  # Port to listen on (non-privileged ports are > 1023)
+PORT = 12001  # Port to listen on (non-privileged ports are > 1023)
 
 
 # Uploading to the server from the client
@@ -63,30 +63,37 @@ def check_login(user, pas):
     print('Checking credentials.')
     file = open('credentials.txt', 'r')
     while True:
-        line = file.readline()
+        line = file.readline()[:-1]
         if not line:
             break
         # There must be a better way of checking if the username and passwords are valid.
-        if user in line and pas in line:
+        cred = line.split(",", 2)
+        print(cred)
+        if user == cred[0] and pas == cred[1]:
             file.close()
             connect.send('Credentials Accepted'.encode())
-            return
+            return True
     file.close()
     connect.send('Credentials Rejected'.encode())
-    check_login(connect.recv(1024).decode(), connect.recv(1024).decode())
+    return False
+    # check_login(connect.recv(1024).decode(), connect.recv(1024).decode())
 
 
 # Establishing connection with client.
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind((HOST, PORT))
 s.listen()
-print("Server ready to send")
+print("Server is operational")
 connect, addr = s.accept()
-
 # Login functionality
-username = connect.recv(1024).decode()
-password = connect.recv(1024).decode()
-check_login(username, password)
+usernamePass = (connect.recv(1024).decode()).split(",")
+print(usernamePass)
+username, password = usernamePass[0], usernamePass[1] 
+while not check_login(username, password):
+    if input("Do you want to try again? y/n : ") == "n" :
+        print("Thanks see you")
+        s.close()
+        exit()
 
 mode = connect.recv(1024).decode()
 modes(mode)

@@ -3,10 +3,8 @@ import os
 import base64
 
 HOST = "127.0.0.1"  # The server's hostname or IP address
-PORT = 12000  # The port used by the server
+PORT = 12001  # The port used by the server
 
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect((HOST, PORT))
 
 
 def download_from_server():
@@ -80,8 +78,9 @@ def start_chat():
 def login_function():
     username = input('Username: ')
     password = input('Password: ')
-    s.send(username.encode())
-    s.send(password.encode())
+    cred = username + "," + password
+    s.send(cred.encode())    
+    # s.send(password.encode())
     credential_status = s.recv(1024).decode()
     print(credential_status)
     if credential_status == 'Credentials Accepted':
@@ -116,6 +115,10 @@ def menu():
         else:
             print('That was not a valid number. Please enter your choice again.')
 
+
+# Establishing connection with server.
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect((HOST, PORT))
 
 menu()
 s.close()
