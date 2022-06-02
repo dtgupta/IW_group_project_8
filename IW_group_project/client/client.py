@@ -86,8 +86,18 @@ def login_function():
     if credential_status == 'Credentials Accepted':
         return
     else:
-        login_function()
-
+        choice = ""
+        while choice == "":
+            choice = input("Do you want to try again? y/n : ") 
+            if choice == "n" :
+                s.send("".encode()) 
+                print("Thanks see you again")
+                s.close()
+                exit()
+            elif choice == "y":
+                login_function()
+            else:
+                choice = ""
 
 def menu():
     login_function()

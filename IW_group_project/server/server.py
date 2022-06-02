@@ -86,15 +86,17 @@ s.listen()
 print("Server is operational")
 connect, addr = s.accept()
 # Login functionality
-usernamePass = (connect.recv(1024).decode()).split(",")
-print(usernamePass)
-username, password = usernamePass[0], usernamePass[1] 
-while not check_login(username, password):
-    if input("Do you want to try again? y/n : ") == "n" :
-        print("Thanks see you")
+tryLog = True
+while tryLog: 
+    usernamePass = (connect.recv(1024).decode()).split(",")
+    if (usernamePass[0] == ""):
         s.close()
-        exit()
+        quit()
+    username, password = usernamePass[0], usernamePass[1] 
+    if check_login(username, password):
+        break
 
 mode = connect.recv(1024).decode()
+print(mode)
 modes(mode)
 s.close()
