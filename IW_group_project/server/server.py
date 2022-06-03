@@ -31,7 +31,7 @@ def upload_to_server():
         while True:
             data = base64.b64encode(f.read(1024))
             if not data:
-                print('File download complete.')
+                print('File upload complete.')
                 break
             connect.send(data)
             time.sleep(0.00001)
@@ -44,6 +44,33 @@ def file_list():
     connect.send(str(filelist).encode())
 
 
+def chat_feature():
+    # Since the user has chosen the chat option, we want to send the entire chat first.
+    with open('chatlog.txt', 'rb') as chat:
+        print('Sending the chatlogs to the client')
+        while True:
+            data = base64.b64encode(chat.read(1024))
+            if not data:
+                print('File upload complete.')
+                break
+            connect.send(data)
+            time.sleep(0.00001)
+    chat.close()
+    # print('Reaching here!!')
+    # receivedMsg = connect.recv(10)
+    # print(receivedMsg)
+    # with open('chatlog.txt', 'w') as chat:
+    #     while True:
+    #         receivedMsg, address = udp.recvfrom(1024)
+    #         receivedMsg = receivedMsg.decode().split('.!?')
+    #         if receivedMsg[1] == '!q':
+    #             chat.close()
+    #             break
+    #         else:
+    #             chat.write(f'[{receivedMsg[0]}]: ' + receivedMsg[1])
+    # chat.close()
+
+
 def modes(option):
     if option == '1':
         file_list()
@@ -51,8 +78,8 @@ def modes(option):
         download_from_client()
     elif option == '3':
         upload_to_server()
-    # elif mode == '4':
-
+    elif mode == '4':
+        chat_feature()
     elif mode == '5':
         # check_login()
         print('Logout procedure initiated.')
@@ -76,12 +103,17 @@ def check_login(user, pas):
     check_login(connect.recv(1024).decode(), connect.recv(1024).decode())
 
 
-# Establishing connection with client.
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.bind((HOST, PORT))
-s.listen()
+# Establishing a TCP connection with client.
+tcp = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+tcp.bind((HOST, PORT))
+tcp.listen()
+
+# Establishing a UDP connection with client.
+udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0)
+udp.bind((HOST, 12001))
+
 print("Server ready to send")
-connect, addr = s.accept()
+connect, addr = tcp.accept()
 
 # Login functionality
 username = connect.recv(1024).decode()
@@ -90,4 +122,4 @@ check_login(username, password)
 
 mode = connect.recv(1024).decode()
 modes(mode)
-s.close()
+tcp.close()
