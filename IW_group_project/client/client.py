@@ -1,9 +1,11 @@
 import socket
 import os
 import base64
+import time
 
 HOST = "127.0.0.1"  # The server's hostname or IP address
-PORT = 12001  # The port used by the server
+PORT = 12000  # The port used by the server
+username = ""
 
 def printMenu():
     menu =  '__       __                               \n'\
@@ -16,7 +18,7 @@ def printMenu():
     '$$ | $/  $$ |$$       |$$ |  $$ |$$    $$/ \n'\
     '$$/      $$/  $$$$$$$/ $$/   $$/  $$$$$$/  \n'
     print(menu)
-    
+
 def download_from_server():
     # Setting mode
     mode = '3'
@@ -39,16 +41,22 @@ def download_from_server():
 
     f.close()
 
-
 def upload_to_server():
     # Setting mode
     mode = '2'
     s.send(mode.encode())
-
+    
+    # print("Start uploading " + sendFileName)
     print('Files to upload from:')
     files = [f for f in os.listdir('.') if os.path.isfile(f)]
     print(files)
-    sendFileName = input("File name:")
+
+    sendFileName = input("File name:") 
+    # if sendFileName not in files:
+    #     print("Invalid FileName")
+    #     s.send("".encode())
+    #     return 
+    
     s.send(str(sendFileName).encode())
 
     file = open(sendFileName, 'rb')
@@ -82,10 +90,27 @@ def file_list():
 
 
 def start_chat():
-    print('placeholder')
+    # Initially we'll get the entire chat from the server
+    mode = '4'
+    s.send(mode.encode())
+    print('Chat Logs:')
+    while True:
+        chat = s.recv(1024)
+        decodeChat = base64.b64decode(chat)
+        print(str(decodeChat, 'UTF-8'))
+        if not chat:
+            print('---End of Chat---')
+            break
+    # Now we will start an udp connection to carry out the chat functionality
+    # msg = input(f'[{username}]: ')
+    # print(msg)
+    # toSend = username + '.!?' + msg
+    # print(toSend)
+    # s.send(toSend.encode())
 
 
 def login_function():
+    global username
     choice = input("Do you want to login ? y/n : ")
     if (choice == "n"):
         return False
@@ -127,13 +152,10 @@ def menu():
             file_list()
         elif user_choice == '2':
             download_from_server()
-            break
         elif user_choice == '3':
             upload_to_server()
-            break
         elif user_choice == '4':
             start_chat()
-            break
         elif user_choice == '5':
             mode = '5'
             s.send(mode.encode())
@@ -143,9 +165,16 @@ def menu():
     menu()
 
 
-# Establishing connection with server.
+
+
+
+# Establishing a TCP connection with server.
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((HOST, PORT))
+
+# Establishing a UDP connection with the server
+udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0)
+udp.connect((HOST, 12001))
 
 menu()
 s.send("".encode()) 
