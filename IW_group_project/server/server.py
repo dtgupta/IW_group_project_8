@@ -56,9 +56,9 @@ def chat_feature():
             connect.send(data)
             time.sleep(0.00001)
     chat.close()
-    print('Reaching here!!')
-    receivedMsg = connect.recv(10)
-    print(receivedMsg)
+    # print('Reaching here!!')
+    # receivedMsg = connect.recv(10)
+    # print(receivedMsg)
     # with open('chatlog.txt', 'w') as chat:
     #     while True:
     #         receivedMsg, address = udp.recvfrom(1024)
