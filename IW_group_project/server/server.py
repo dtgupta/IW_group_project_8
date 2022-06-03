@@ -43,8 +43,9 @@ def file_list():
     filelist = [f for f in os.listdir('.') if os.path.isfile(f)]
     connect.send(str(filelist).encode())
 
-
+# return True if client logout
 def modes(option):
+    ret = False
     if option == '1':
         file_list()
     elif option == '2':
@@ -52,10 +53,11 @@ def modes(option):
     elif option == '3':
         upload_to_server()
     # elif mode == '4':
-
     elif mode == '5':
         # check_login()
         print('Logout procedure initiated.')
+        ret = True
+    return ret
 
 
 def check_login(user, pas):
@@ -66,9 +68,9 @@ def check_login(user, pas):
         line = file.readline()[:-1]
         if not line:
             break
-        # There must be a better way of checking if the username and passwords are valid.
+        #check if the username and passwords are valid.
         cred = line.split(",", 2)
-        print(cred)
+        # print(cred)
         if user == cred[0] and pas == cred[1]:
             file.close()
             connect.send('Credentials Accepted'.encode())
@@ -85,18 +87,22 @@ s.bind((HOST, PORT))
 s.listen()
 print("Server is operational")
 connect, addr = s.accept()
-# Login functionality
-tryLog = True
-while tryLog: 
-    usernamePass = (connect.recv(1024).decode()).split(",")
-    if (usernamePass[0] == ""):
-        s.close()
-        quit()
-    username, password = usernamePass[0], usernamePass[1] 
-    if check_login(username, password):
-        break
 
-mode = connect.recv(1024).decode()
-print(mode)
-modes(mode)
+quit = False
+while not quit:
+    # Login functionality
+    while True: 
+        usernamePass = (connect.recv(1024).decode()).split(",")
+        if (usernamePass[0] == ""):
+            print("Connection is over")
+            s.close()
+            exit()
+        username, password = usernamePass[0], usernamePass[1] 
+        if check_login(username, password):
+            break
+
+    logout = False
+    while not logout:
+        mode = connect.recv(1024).decode()
+        logout = modes(mode)
 s.close()
