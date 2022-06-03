@@ -1,23 +1,24 @@
-import socket
-import os
 import base64
-import time
+import os
+import socket
 
 HOST = "127.0.0.1"  # The server's hostname or IP address
 PORT = 12000  # The port used by the server
 username = ""
 
+
 def printMenu():
-    menu =  '__       __                               \n'\
-    '/  \     /  |                              \n'\
-    '$$  \   /$$ |  ______   _______   __    __ \n'\
-    '$$$  \ /$$$ | /      \ /       \ /  |  /  |\n'\
-    '$$$$  /$$$$ |/$$$$$$  |$$$$$$$  |$$ |  $$ |\n'\
-    '$$ $$ $$/$$ |$$    $$ |$$ |  $$ |$$ |  $$ |\n'\
-    '$$ |$$$/ $$ |$$$$$$$$/ $$ |  $$ |$$ \__$$ |\n'\
-    '$$ | $/  $$ |$$       |$$ |  $$ |$$    $$/ \n'\
-    '$$/      $$/  $$$$$$$/ $$/   $$/  $$$$$$/  \n'
+    menu = '__       __                               \n' \
+           '/  \     /  |                              \n' \
+           '$$  \   /$$ |  ______   _______   __    __ \n' \
+           '$$$  \ /$$$ | /      \ /       \ /  |  /  |\n' \
+           '$$$$  /$$$$ |/$$$$$$  |$$$$$$$  |$$ |  $$ |\n' \
+           '$$ $$ $$/$$ |$$    $$ |$$ |  $$ |$$ |  $$ |\n' \
+           '$$ |$$$/ $$ |$$$$$$$$/ $$ |  $$ |$$ \__$$ |\n' \
+           '$$ | $/  $$ |$$       |$$ |  $$ |$$    $$/ \n' \
+           '$$/      $$/  $$$$$$$/ $$/   $$/  $$$$$$/  \n'
     print(menu)
+
 
 def download_from_server():
     # Setting mode
@@ -41,22 +42,23 @@ def download_from_server():
 
     f.close()
 
+
 def upload_to_server():
     # Setting mode
     mode = '2'
     s.send(mode.encode())
-    
+
     # print("Start uploading " + sendFileName)
     print('Files to upload from:')
     files = [f for f in os.listdir('.') if os.path.isfile(f)]
     print(files)
 
-    sendFileName = input("File name:") 
+    sendFileName = input("File name:")
     # if sendFileName not in files:
     #     print("Invalid FileName")
     #     s.send("".encode())
     #     return 
-    
+
     s.send(str(sendFileName).encode())
 
     file = open(sendFileName, 'rb')
@@ -112,7 +114,7 @@ def start_chat():
 def login_function():
     global username
     choice = input("Do you want to login ? y/n : ")
-    if (choice == "n"):
+    if choice == "n":
         return False
     elif choice != "y":
         print("Only y/n answer accepted")
@@ -121,7 +123,7 @@ def login_function():
         username = input('Username: ')
         password = input('Password: ')
         cred = username + "," + password
-        s.send(cred.encode())    
+        s.send(cred.encode())
         credential_status = s.recv(1024).decode()
         print(credential_status)
         if credential_status == 'Credentials Accepted':
@@ -129,13 +131,14 @@ def login_function():
         else:
             choice = ""
             while choice == "":
-                choice = input("Do you want to try again? y/n : ") 
-                if choice == "n" :
+                choice = input("Do you want to try again? y/n : ")
+                if choice == "n":
                     return False
                 elif choice == "y":
                     break
                 else:
                     choice = ""
+
 
 def menu():
     if not login_function():
@@ -165,9 +168,6 @@ def menu():
     menu()
 
 
-
-
-
 # Establishing a TCP connection with server.
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((HOST, PORT))
@@ -177,6 +177,6 @@ udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0)
 udp.connect((HOST, 12001))
 
 menu()
-s.send("".encode()) 
+s.send("".encode())
 print("See you again")
 s.close()

@@ -7,6 +7,7 @@ import time
 HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
 PORT = 12000  # Port to listen on (non-privileged ports are > 1023)
 
+
 # Uploading to the server from the client
 def download_from_client():
     filename = connect.recv(1024).decode()
@@ -96,7 +97,7 @@ def check_login(user, pas):
         line = file.readline()[:-1]
         if not line:
             break
-        #check if the username and passwords are valid.
+        # check if the username and passwords are valid.
         cred = line.split(",", 2)
         # print(cred)
         if user == cred[0] and pas == cred[1]:
@@ -121,16 +122,16 @@ udp.bind((HOST, 12001))
 print("Server operational")
 connect, addr = tcp.accept()
 
-quit = False
-while not quit:
+quitF = False
+while not quitF:
     # Login functionality
-    while True: 
+    while True:
         usernamePass = (connect.recv(1024).decode()).split(",")
-        if (usernamePass[0] == ""):
+        if usernamePass[0] == "":
             print("Connection is over")
             tcp.close()
             exit()
-        username, password = usernamePass[0], usernamePass[1] 
+        username, password = usernamePass[0], usernamePass[1]
         if check_login(username, password):
             break
 
