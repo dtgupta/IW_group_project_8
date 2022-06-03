@@ -1,12 +1,19 @@
 import socket
 import os
 import base64
+import time
 
 HOST = "127.0.0.1"  # The server's hostname or IP address
 PORT = 12000  # The port used by the server
+username = ""
 
+# Establishing a TCP connection with the server
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((HOST, PORT))
+
+# Establishing a TCP connection with the server
+udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0)
+udp.connect((HOST, 12001))
 
 
 def download_from_server():
@@ -74,10 +81,27 @@ def file_list():
 
 
 def start_chat():
-    print('placeholder')
+    # Initially we'll get the entire chat from the server
+    mode = '4'
+    s.send(mode.encode())
+    print('Chat Logs:')
+    while True:
+        chat = s.recv(1024)
+        decodeChat = base64.b64decode(chat)
+        print(str(decodeChat, 'UTF-8'))
+        if not chat:
+            print('---End of Chat---')
+            break
+    # Now we will start an udp connection to carry out the chat functionality
+    msg = input(f'[{username}]: ')
+    print(msg)
+    toSend = username + '.!?' + msg
+    print(toSend)
+    s.send(toSend.encode())
 
 
 def login_function():
+    global username
     username = input('Username: ')
     password = input('Password: ')
     s.send(username.encode())
