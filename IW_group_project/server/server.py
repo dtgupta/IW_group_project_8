@@ -7,7 +7,6 @@ import time
 HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
 PORT = 12000  # Port to listen on (non-privileged ports are > 1023)
 
-
 # Uploading to the server from the client
 def download_from_client():
     filename = connect.recv(1024).decode()
@@ -25,6 +24,7 @@ def download_from_client():
 # Download to the server from the client
 def upload_to_server():
     filename = connect.recv(1024).decode()
+    print(filename)
     # Choosing a file
     with open(filename, 'rb') as f:
         print("File opened!")
@@ -34,7 +34,7 @@ def upload_to_server():
                 print('File upload complete.')
                 break
             connect.send(data)
-            time.sleep(0.00001)
+            time.sleep(0.0001)
 
     f.close()
 
@@ -72,6 +72,7 @@ def chat_feature():
 
 
 def modes(option):
+    ret = False
     if option == '1':
         file_list()
     elif option == '2':
@@ -83,6 +84,8 @@ def modes(option):
     elif mode == '5':
         # check_login()
         print('Logout procedure initiated.')
+        ret = True
+    return ret
 
 
 def check_login(user, pas):
@@ -90,17 +93,20 @@ def check_login(user, pas):
     print('Checking credentials.')
     file = open('credentials.txt', 'r')
     while True:
-        line = file.readline()
+        line = file.readline()[:-1]
         if not line:
             break
-        # There must be a better way of checking if the username and passwords are valid.
-        if user in line and pas in line:
+        #check if the username and passwords are valid.
+        cred = line.split(",", 2)
+        # print(cred)
+        if user == cred[0] and pas == cred[1]:
             file.close()
             connect.send('Credentials Accepted'.encode())
-            return
+            return True
     file.close()
     connect.send('Credentials Rejected'.encode())
-    check_login(connect.recv(1024).decode(), connect.recv(1024).decode())
+    return False
+    # check_login(connect.recv(1024).decode(), connect.recv(1024).decode())
 
 
 # Establishing a TCP connection with client.
@@ -112,14 +118,24 @@ tcp.listen()
 udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0)
 udp.bind((HOST, 12001))
 
-print("Server ready to send")
+print("Server operational")
 connect, addr = tcp.accept()
 
-# Login functionality
-username = connect.recv(1024).decode()
-password = connect.recv(1024).decode()
-check_login(username, password)
+quit = False
+while not quit:
+    # Login functionality
+    while True: 
+        usernamePass = (connect.recv(1024).decode()).split(",")
+        if (usernamePass[0] == ""):
+            print("Connection is over")
+            tcp.close()
+            exit()
+        username, password = usernamePass[0], usernamePass[1] 
+        if check_login(username, password):
+            break
 
-mode = connect.recv(1024).decode()
-modes(mode)
+    logout = False
+    while not logout:
+        mode = connect.recv(1024).decode()
+        logout = modes(mode)
 tcp.close()

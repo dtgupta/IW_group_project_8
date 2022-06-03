@@ -7,14 +7,17 @@ HOST = "127.0.0.1"  # The server's hostname or IP address
 PORT = 12000  # The port used by the server
 username = ""
 
-# Establishing a TCP connection with the server
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect((HOST, PORT))
-
-# Establishing a TCP connection with the server
-udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0)
-udp.connect((HOST, 12001))
-
+def printMenu():
+    menu =  '__       __                               \n'\
+    '/  \     /  |                              \n'\
+    '$$  \   /$$ |  ______   _______   __    __ \n'\
+    '$$$  \ /$$$ | /      \ /       \ /  |  /  |\n'\
+    '$$$$  /$$$$ |/$$$$$$  |$$$$$$$  |$$ |  $$ |\n'\
+    '$$ $$ $$/$$ |$$    $$ |$$ |  $$ |$$ |  $$ |\n'\
+    '$$ |$$$/ $$ |$$$$$$$$/ $$ |  $$ |$$ \__$$ |\n'\
+    '$$ | $/  $$ |$$       |$$ |  $$ |$$    $$/ \n'\
+    '$$/      $$/  $$$$$$$/ $$/   $$/  $$$$$$/  \n'
+    print(menu)
 
 def download_from_server():
     # Setting mode
@@ -38,16 +41,22 @@ def download_from_server():
 
     f.close()
 
-
 def upload_to_server():
     # Setting mode
     mode = '2'
     s.send(mode.encode())
-
+    
+    # print("Start uploading " + sendFileName)
     print('Files to upload from:')
     files = [f for f in os.listdir('.') if os.path.isfile(f)]
     print(files)
-    sendFileName = input("File name:")
+
+    sendFileName = input("File name:") 
+    # if sendFileName not in files:
+    #     print("Invalid FileName")
+    #     s.send("".encode())
+    #     return 
+    
     s.send(str(sendFileName).encode())
 
     file = open(sendFileName, 'rb')
@@ -93,31 +102,48 @@ def start_chat():
             print('---End of Chat---')
             break
     # Now we will start an udp connection to carry out the chat functionality
-    msg = input(f'[{username}]: ')
-    print(msg)
-    toSend = username + '.!?' + msg
-    print(toSend)
-    s.send(toSend.encode())
+    # msg = input(f'[{username}]: ')
+    # print(msg)
+    # toSend = username + '.!?' + msg
+    # print(toSend)
+    # s.send(toSend.encode())
 
 
 def login_function():
     global username
-    username = input('Username: ')
-    password = input('Password: ')
-    s.send(username.encode())
-    s.send(password.encode())
-    credential_status = s.recv(1024).decode()
-    print(credential_status)
-    if credential_status == 'Credentials Accepted':
-        return
-    else:
-        login_function()
-
+    choice = input("Do you want to login ? y/n : ")
+    if (choice == "n"):
+        return False
+    elif choice != "y":
+        print("Only y/n answer accepted")
+        return login_function()
+    while True:
+        username = input('Username: ')
+        password = input('Password: ')
+        cred = username + "," + password
+        s.send(cred.encode())    
+        credential_status = s.recv(1024).decode()
+        print(credential_status)
+        if credential_status == 'Credentials Accepted':
+            return True
+        else:
+            choice = ""
+            while choice == "":
+                choice = input("Do you want to try again? y/n : ") 
+                if choice == "n" :
+                    return False
+                elif choice == "y":
+                    break
+                else:
+                    choice = ""
 
 def menu():
-    login_function()
+    if not login_function():
+        return
     menu_list = ['1. View files', '2. Download', '3. Upload', '4. Chat', '5. Logout']
     while True:
+        # os.system('cls' if os.name == 'nt' else 'clear')
+        # printMenu()
         for i in menu_list:
             print(i)
         user_choice = input('Choose a number: ')
@@ -126,20 +152,31 @@ def menu():
             file_list()
         elif user_choice == '2':
             download_from_server()
-            break
         elif user_choice == '3':
             upload_to_server()
-            break
         elif user_choice == '4':
             start_chat()
-            break
         elif user_choice == '5':
-            login_function()
-            print('Have a nice day!')
+            mode = '5'
+            s.send(mode.encode())
             break
         else:
             print('That was not a valid number. Please enter your choice again.')
+    menu()
 
+
+
+
+
+# Establishing a TCP connection with server.
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.connect((HOST, PORT))
+
+# Establishing a UDP connection with the server
+udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, 0)
+udp.connect((HOST, 12001))
 
 menu()
+s.send("".encode()) 
+print("See you again")
 s.close()
