@@ -1,6 +1,7 @@
 import socket
 import os
 import base64
+import time
 
 HOST = "127.0.0.1"  # The server's hostname or IP address
 PORT = 12000  # The port used by the server
@@ -26,7 +27,7 @@ def download_from_server():
         f.write(decodedString)
         print("File is downloading...")
         if not m:
-            print("File has been download!")
+            print("File has been downloaded!")
             break
 
     f.close()
@@ -72,6 +73,34 @@ def file_list():
         else:
             print('That was not a valid number. Please enter your choice again.')
 
+def batch_download():
+    t0 = time.time()
+    mode = '6'
+    s.send(mode.encode())
+    files = s.recv(1024).decode()
+    sliced = files[2:-2]
+    split = sliced.split("', '")
+    print(split)
+
+    for i in split:
+        print(i)
+        s.send(str(i).encode())
+        f = open(i, 'wb')
+        print("File opened!")
+        while True:
+            m = s.recv(2048)
+            if m.decode() == 'nextfile':
+                print("File has been downloaded!")
+                break
+            decodedString = base64.b64decode(m)
+            f.write(decodedString)
+            print("File is downloading...")
+            print(m)
+        f.close()
+    t1 = time.time()
+    total_time = t1-t0
+    print("All files have been downloaded!")
+    print("Total downloading time was", total_time, 'seconds.')
 
 def start_chat():
     print('placeholder')
@@ -92,7 +121,7 @@ def login_function():
 
 def menu():
     login_function()
-    menu_list = ['1. View files', '2. Download', '3. Upload', '4. Chat', '5. Logout']
+    menu_list = ['1. View files', '2. Download', '3. Upload', '4. Chat', '5. Batch download', '6. Logout']
     while True:
         for i in menu_list:
             print(i)
@@ -110,6 +139,9 @@ def menu():
             start_chat()
             break
         elif user_choice == '5':
+            batch_download()
+            break
+        elif user_choice == '6':
             login_function()
             print('Have a nice day!')
             break

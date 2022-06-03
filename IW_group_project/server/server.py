@@ -38,6 +38,27 @@ def upload_to_server():
 
     f.close()
 
+def sbatch_download():
+    filelist = [f for f in os.listdir('.') if os.path.isfile(f)]
+    connect.send(str(filelist).encode())
+    print(len(filelist))
+
+
+    for i in range(len(filelist)):
+        filename = connect.recv(1024).decode()
+        f = open(filename, 'rb')
+        print("File opened!")
+        while True:
+            data = base64.b64encode(f.read(1024))
+            if not data:
+                print('File download complete.')
+                connect.send('nextfile'.encode())
+                break
+            connect.send(data)
+            time.sleep(0.00001)
+
+        f.close()
+        print('File closed')
 
 def file_list():
     filelist = [f for f in os.listdir('.') if os.path.isfile(f)]
@@ -56,6 +77,8 @@ def modes(option):
     elif mode == '5':
         # check_login()
         print('Logout procedure initiated.')
+    elif mode == '6':
+        sbatch_download()
 
 
 def check_login(user, pas):
