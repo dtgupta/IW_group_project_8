@@ -144,12 +144,9 @@ def menu():
         return
     menu_list = ['1. View files', '2. Download', '3. Upload', '4. Chat', '5. Logout']
     while True:
-        # os.system('cls' if os.name == 'nt' else 'clear')
-        # printMenu()
         for i in menu_list:
             print(i)
         user_choice = input('Choose a number: ')
-        # s.send(user_choice.encode())
         if user_choice == '1':
             file_list()
         elif user_choice == '2':

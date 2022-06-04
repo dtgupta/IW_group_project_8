@@ -4,7 +4,7 @@ import base64
 import time
 
 # Establishing connection
-HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
+HOST = "127.0.0.1"  # Standard loop back interface address (localhost)
 PORT = 12000  # Port to listen on (non-privileged ports are > 1023)
 
 
@@ -43,8 +43,8 @@ def upload_to_server():
 
 
 def file_list():
-    filelist = [f for f in os.listdir('.') if os.path.isfile(f)]
-    connect.send(str(filelist).encode())
+    fileList = [f for f in os.listdir('.') if os.path.isfile(f)]
+    connect.send(str(fileList).encode())
 
 
 def chat_feature():
@@ -92,7 +92,6 @@ def modes(option):
     elif mode == '4':
         chat_feature()
     else:
-        # check_login()
         print('Logout procedure initiated.')
         ret = True
     return ret
@@ -108,15 +107,14 @@ def check_login(user, pas):
             break
         # check if the username and passwords are valid.
         cred = line.split(",", 2)
-        # print(cred)
         if user == cred[0] and pas == cred[1]:
             file.close()
             connect.send('Credentials Accepted'.encode())
             return True
+        
     file.close()
     connect.send('Credentials Rejected'.encode())
     return False
-    # check_login(connect.recv(1024).decode(), connect.recv(1024).decode())
 
 
 # Establishing a TCP connection with client.
