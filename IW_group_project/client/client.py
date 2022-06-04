@@ -90,6 +90,34 @@ def file_list():
         else:
             print('That was not a valid number. Please enter your choice again.')
 
+def batch_download():
+    t0 = time.time()
+    mode = '6'
+    s.send(mode.encode())
+    files = s.recv(1024).decode()
+    sliced = files[2:-2]
+    split = sliced.split("', '")
+    print(split)
+
+    for i in split:
+        print(i)
+        s.send(str(i).encode())
+        f = open(i, 'wb')
+        print("File opened!")
+        while True:
+            m = s.recv(2048)
+            if m.decode() == 'nextfile':
+                print("File has been downloaded!")
+                break
+            decodedString = base64.b64decode(m)
+            f.write(decodedString)
+            print("File is downloading...")
+            print(m)
+        f.close()
+    t1 = time.time()
+    total_time = t1-t0
+    print("All files have been downloaded!")
+    print("Total downloading time was", total_time, 'seconds.')
 
 def start_chat():
     # Initially we'll get the entire chat from the server
@@ -142,7 +170,7 @@ def login_function():
 def menu():
     if not login_function():
         return
-    menu_list = ['1. View files', '2. Download', '3. Upload', '4. Chat', '5. Logout']
+    menu_list = ['1. View files', '2. Download', '3. Upload', '4. Chat', '5. Batch download', '6. Logout']
     while True:
         for i in menu_list:
             print(i)
@@ -156,6 +184,8 @@ def menu():
         elif user_choice == '4':
             start_chat()
         elif user_choice == '5':
+            batch_download()
+        elif user_choice == '6':
             mode = '5'
             s.send(mode.encode())
             break
