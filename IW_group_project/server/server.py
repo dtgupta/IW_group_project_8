@@ -4,8 +4,9 @@ import base64
 import time
 
 # Establishing connection
-HOST = "127.0.0.1"  # Standard loopback interface address (localhost)
+HOST = "127.0.0.1"  # Standard loop back interface address (localhost)
 PORT = 12000  # Port to listen on (non-privileged ports are > 1023)
+
 
 # Uploading to the server from the client
 def download_from_client():
@@ -32,11 +33,13 @@ def upload_to_server():
             data = base64.b64encode(f.read(1024))
             if not data:
                 print('File upload complete.')
+                connect.send('eof'.encode())
                 break
             connect.send(data)
             time.sleep(0.0001)
 
     f.close()
+    print('File is closed')
 
 def sbatch_download():
     filelist = [f for f in os.listdir('.') if os.path.isfile(f)]
@@ -61,8 +64,8 @@ def sbatch_download():
         print('File closed')
 
 def file_list():
-    filelist = [f for f in os.listdir('.') if os.path.isfile(f)]
-    connect.send(str(filelist).encode())
+    fileList = [f for f in os.listdir('.') if os.path.isfile(f)]
+    connect.send(str(fileList).encode())
 
 
 def chat_feature():
@@ -72,18 +75,25 @@ def chat_feature():
         while True:
             data = base64.b64encode(chat.read(1024))
             if not data:
+                connect.send('eof'.encode())
                 print('File upload complete.')
                 break
             connect.send(data)
             time.sleep(0.00001)
     chat.close()
-    # print('Reaching here!!')
-    # receivedMsg = connect.recv(10)
-    # print(receivedMsg)
+
+    # Receiving the chat from the client and appending it to the logs.
+    receivedMsg = str(connect.recv(1024), 'UTF-8')
+    f = open('chatlog.txt', 'a')
+    split = receivedMsg.split('.!?')
+    if split[1] != '!q':
+        f.write(f'[{split[0]}]: {split[1]}\n')
+    f.close()
     # with open('chatlog.txt', 'w') as chat:
     #     while True:
     #         receivedMsg, address = udp.recvfrom(1024)
     #         receivedMsg = receivedMsg.decode().split('.!?')
+    #         print(receivedMsg[0] + ": " + receivedMsg[1])
     #         if receivedMsg[1] == '!q':
     #             chat.close()
     #             break
@@ -119,17 +129,16 @@ def check_login(user, pas):
         line = file.readline()[:-1]
         if not line:
             break
-        #check if the username and passwords are valid.
+        # check if the username and passwords are valid.
         cred = line.split(",", 2)
-        # print(cred)
         if user == cred[0] and pas == cred[1]:
             file.close()
             connect.send('Credentials Accepted'.encode())
             return True
+        
     file.close()
     connect.send('Credentials Rejected'.encode())
     return False
-    # check_login(connect.recv(1024).decode(), connect.recv(1024).decode())
 
 
 # Establishing a TCP connection with client.
@@ -144,16 +153,16 @@ udp.bind((HOST, 12001))
 print("Server operational")
 connect, addr = tcp.accept()
 
-quit = False
-while not quit:
+quitF = False
+while not quitF:
     # Login functionality
-    while True: 
+    while True:
         usernamePass = (connect.recv(1024).decode()).split(",")
-        if (usernamePass[0] == ""):
+        if usernamePass[0] == "":
             print("Connection is over")
             tcp.close()
             exit()
-        username, password = usernamePass[0], usernamePass[1] 
+        username, password = usernamePass[0], usernamePass[1]
         if check_login(username, password):
             break
 
