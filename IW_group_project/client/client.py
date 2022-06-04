@@ -33,12 +33,12 @@ def download_from_server():
     print("File opened!")
     while True:
         m = s.recv(2048)
-        decodedString = base64.b64decode(m)
-        f.write(decodedString)
-        print("File is downloading...")
-        if not m:
+        if m.decode() == 'eof':
             print("File has been download!")
             break
+        decodedString = base64.b64decode(m)
+        print("File is downloading...")
+        f.write(decodedString)
 
     f.close()
 
@@ -98,17 +98,16 @@ def start_chat():
     print('Chat Logs:')
     while True:
         chat = s.recv(1024)
-        decodeChat = base64.b64decode(chat)
-        print(str(decodeChat, 'UTF-8'))
-        if not chat:
+        if chat.decode() == 'eof':
             print('---End of Chat---')
             break
+        decodeChat = base64.b64decode(chat)
+        print(str(decodeChat, 'UTF-8'))
+
     # Now we will start an udp connection to carry out the chat functionality
-    # msg = input(f'[{username}]: ')
-    # print(msg)
-    # toSend = username + '.!?' + msg
-    # print(toSend)
-    # s.send(toSend.encode())
+    msg = input(f'[{username}]: ')
+    toSend = username + '.!?' + msg
+    s.send(toSend.encode())
 
 
 def login_function():

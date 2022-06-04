@@ -33,11 +33,13 @@ def upload_to_server():
             data = base64.b64encode(f.read(1024))
             if not data:
                 print('File upload complete.')
+                connect.send('eof'.encode())
                 break
             connect.send(data)
             time.sleep(0.0001)
 
     f.close()
+    print('File is closed')
 
 
 def file_list():
@@ -52,18 +54,25 @@ def chat_feature():
         while True:
             data = base64.b64encode(chat.read(1024))
             if not data:
+                connect.send('eof'.encode())
                 print('File upload complete.')
                 break
             connect.send(data)
             time.sleep(0.00001)
     chat.close()
-    # print('Reaching here!!')
-    # receivedMsg = connect.recv(10)
-    # print(receivedMsg)
+
+    # Receiving the chat from the client and appending it to the logs.
+    receivedMsg = str(connect.recv(1024), 'UTF-8')
+    f = open('chatlog.txt', 'a')
+    split = receivedMsg.split('.!?')
+    if split[1] != '!q':
+        f.write(f'[{split[0]}]: {split[1]}\n')
+    f.close()
     # with open('chatlog.txt', 'w') as chat:
     #     while True:
     #         receivedMsg, address = udp.recvfrom(1024)
     #         receivedMsg = receivedMsg.decode().split('.!?')
+    #         print(receivedMsg[0] + ": " + receivedMsg[1])
     #         if receivedMsg[1] == '!q':
     #             chat.close()
     #             break
@@ -82,7 +91,7 @@ def modes(option):
         upload_to_server()
     elif mode == '4':
         chat_feature()
-    elif mode == '5':
+    else:
         # check_login()
         print('Logout procedure initiated.')
         ret = True
