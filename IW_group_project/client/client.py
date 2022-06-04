@@ -56,8 +56,8 @@ def upload_to_server():
     sendFileName = input("File name:")
     # if sendFileName not in files:
     #     print("Invalid FileName")
-    #     s.send("".encode())
-    #     return 
+    #     # s.send("".encode())
+    #     return
 
     s.send(str(sendFileName).encode())
 
