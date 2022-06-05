@@ -41,11 +41,11 @@ def upload_to_server():
     f.close()
     print('File is closed')
 
+
 def sbatch_download():
     filelist = [f for f in os.listdir('.') if os.path.isfile(f)]
     connect.send(str(filelist).encode())
     print(len(filelist))
-
 
     for i in range(len(filelist)):
         filename = connect.recv(1024).decode()
@@ -62,6 +62,7 @@ def sbatch_download():
 
         f.close()
         print('File closed')
+
 
 def file_list():
     fileList = [f for f in os.listdir('.') if os.path.isfile(f)]
@@ -113,7 +114,6 @@ def modes(option):
     elif mode == '4':
         chat_feature()
     elif mode == '5':
-        # check_login()
         sbatch_download()
     elif mode == '6':
         print('Logout procedure initiated.')
@@ -135,7 +135,7 @@ def check_login(user, pas):
             file.close()
             connect.send('Credentials Accepted'.encode())
             return True
-        
+
     file.close()
     connect.send('Credentials Rejected'.encode())
     return False

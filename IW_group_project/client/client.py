@@ -1,6 +1,7 @@
 import base64
 import os
 import socket
+import time
 
 HOST = "127.0.0.1"  # The server's hostname or IP address
 PORT = 12000  # The port used by the server
@@ -90,9 +91,10 @@ def file_list():
         else:
             print('That was not a valid number. Please enter your choice again.')
 
+
 def batch_download():
     t0 = time.time()
-    mode = '6'
+    mode = '5'
     s.send(mode.encode())
     files = s.recv(1024).decode()
     sliced = files[2:-2]
@@ -115,9 +117,10 @@ def batch_download():
             print(m)
         f.close()
     t1 = time.time()
-    total_time = t1-t0
+    total_time = t1 - t0
     print("All files have been downloaded!")
     print("Total downloading time was", total_time, 'seconds.')
+
 
 def start_chat():
     # Initially we'll get the entire chat from the server
@@ -186,7 +189,7 @@ def menu():
         elif user_choice == '5':
             batch_download()
         elif user_choice == '6':
-            mode = '5'
+            mode = '6'
             s.send(mode.encode())
             break
         else:
