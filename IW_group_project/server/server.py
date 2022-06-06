@@ -12,11 +12,14 @@ PORT = 12000  # Port to listen on (non-privileged ports are > 1023)
 def download_from_client():
     filename = connect.recv(1024).decode()
     f = open(filename, 'wb')
-    file_chunk = connect.recv(2048)
+    # file_chunk = connect.recv(2048)
 
-    while file_chunk:
-        f.write(file_chunk)
+    while True:
         file_chunk = connect.recv(2048)
+        if file_chunk.decode() == 'eof':
+            print('Download complete.')
+            break
+        f.write(base64.b64decode(file_chunk))
 
     print('File downloaded from client.')
     f.close()
@@ -108,6 +111,7 @@ def modes(option):
     if option == '1':
         file_list()
     elif option == '2':
+        print('beginning to download from client')
         download_from_client()
     elif option == '3':
         upload_to_server()
@@ -169,5 +173,6 @@ while not quitF:
     logout = False
     while not logout:
         mode = connect.recv(1024).decode()
+        print('mode should be 2 but is ' + mode)
         logout = modes(mode)
 tcp.close()

@@ -5,3 +5,6 @@
 [admin]: how is your mother?
 [dibyendu]: she is well, thank you!
 [admin]: !2
+[admin]: sorry typo!!
+[admin]: congratulations on the promotion!!!
+[dibyendu]: thank you kind sir!!q

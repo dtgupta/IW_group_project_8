@@ -49,25 +49,24 @@ def upload_to_server():
     mode = '2'
     s.send(mode.encode())
 
-    # print("Start uploading " + sendFileName)
     print('Files to upload from:')
     files = [f for f in os.listdir('.') if os.path.isfile(f)]
     print(files)
 
     sendFileName = input("File name:")
-    # if sendFileName not in files:
-    #     print("Invalid FileName")
-    #     # s.send("".encode())
-    #     return
-
     s.send(str(sendFileName).encode())
 
     file = open(sendFileName, 'rb')
-    image_data = file.read(2048)
+    # image_data = file.read(2048)
 
-    while image_data:
+    while True:
+        image_data = base64.b64encode(file.read(2048))
+        if not image_data:
+            print('End of file to be uploaded')
+            s.send('eof'.encode())
+            break
         s.send(image_data)
-        image_data = file.read(2048)
+        time.sleep(0.00001)
 
     print('File upload complete.')
     file.close()
@@ -183,6 +182,7 @@ def menu():
         elif user_choice == '2':
             download_from_server()
         elif user_choice == '3':
+            print('beginning to upload')
             upload_to_server()
         elif user_choice == '4':
             start_chat()
